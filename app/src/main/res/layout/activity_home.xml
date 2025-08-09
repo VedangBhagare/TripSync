@@ -1,21 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="24dp">
+    android:layout_height="match_parent">
 
+    <!-- Welcome Text -->
     <TextView
-        android:id="@+id/homeText"
+        android:id="@+id/welcomeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home Activity"
-        android:textSize="24sp"
+        android:text="Welcome, User"
+        android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_margin="16dp"
+        android:layout_gravity="top|center_horizontal" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/bottom_nav_menu"
+        app:labelVisibilityMode="labeled" />
+
+    <!-- Floating Action Button inside tab bar -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/add_itinerary"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/purple_500"
+        app:layout_anchor="@id/bottomNav"
+        app:layout_anchorGravity="center"
+        android:layout_marginBottom="100dp"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

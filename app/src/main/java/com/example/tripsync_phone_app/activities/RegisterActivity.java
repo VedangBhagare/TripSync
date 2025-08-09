@@ -1,17 +1,17 @@
 package com.example.tripsync_phone_app.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.tripsync_phone_app.R;
+import com.example.tripsync_phone_app.auth.SessionManager;
 import com.example.tripsync_phone_app.database.AppDatabase;
 import com.example.tripsync_phone_app.database.User;
 import com.example.tripsync_phone_app.databinding.ActivityRegisterBinding;
-
-import com.example.tripsync_phone_app.R;
-
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -38,17 +38,14 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.fill_all_fields), Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, getString(R.string.invalid_email), Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (!password.equals(confirm)) {
                 Toast.makeText(this, getString(R.string.password_mismatch), Toast.LENGTH_SHORT).show();
                 return;
             }
-
             if (password.length() < 8) {
                 Toast.makeText(this, getString(R.string.password_too_short), Toast.LENGTH_SHORT).show();
                 return;
@@ -60,14 +57,25 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
+            // Build user and hash password
             User user = new User();
             user.username = name;
             user.email = email;
             user.password = BCrypt.hashpw(password, BCrypt.gensalt());
 
-            db.userDao().insertUser(user);
+            // Insert ONCE and capture ID
+            long rowId = db.userDao().insertUser(user);
+            int userId = (int) rowId;
+
+            // Save session
+            SessionManager session = new SessionManager(this);
+            session.saveLogin(userId, user.email, user.username);
+
             Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_SHORT).show();
-            finish(); // return to login
+
+            // Go Home
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
         });
     }
 }

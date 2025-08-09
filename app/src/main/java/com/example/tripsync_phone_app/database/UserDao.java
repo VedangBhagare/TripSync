@@ -7,9 +7,10 @@ import androidx.room.Query;
 @Dao
 public interface UserDao {
 
+    // Return the new rowId so you can store it in Session
     @Insert
-    void insertUser(User user);
+    long insertUser(User user);
 
-    @Query("SELECT * FROM users WHERE email = :email")
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     User getUserByEmail(String email);
 }

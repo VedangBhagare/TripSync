@@ -15,4 +15,37 @@
     <string name="email_exists">This email is already registered</string>
     <string name="login_success">Login successful</string>
     <string name="invalid_credentials">Invalid email or password</string>
+
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="add_itinerary">Add Itinerary</string>
+
+    <string name="add_destination">Add Destination</string>
+    <string name="destination_list">List of added destinations</string>
+
+    <string name="hint_address">Address</string>
+    <string name="hint_note_optional">Note (optional)</string>
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+
+
+    <string name="trip_name">Trip Name</string>
+    <string name="confirm_and_save">Confirm &amp; Save</string>
+
+    <string name="select_location">Select Location</string>
+    <string name="search_location">Search location</string>
+
+
+    <string name="trip_name_required">Trip name is required</string>
+    <string name="itinerary_saved">Itinerary saved!</string>
+
+
+    <string name="my_itineraries">My Itineraries</string>
+    <string name="edit_itinerary">Edit Itinerary</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+
+
+
 </resources>

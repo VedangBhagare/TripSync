@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync_phone_app.R;
 import com.example.tripsync_phone_app.activities.HomeActivity;
+import com.example.tripsync_phone_app.auth.SessionManager;
 import com.example.tripsync_phone_app.database.AppDatabase;
 import com.example.tripsync_phone_app.database.User;
 import com.example.tripsync_phone_app.databinding.ActivityLoginBinding;
@@ -52,6 +53,9 @@ public class LoginActivity extends AppCompatActivity {
                         .apply();
 
                 Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT).show();
+
+                SessionManager session = new SessionManager(this);
+                session.saveLogin(user.id, user.email, user.username);
 
                 // ✅ Redirect to Home
                 startActivity(new Intent(this, HomeActivity.class));
