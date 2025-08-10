@@ -46,6 +46,27 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
 
+    <string name="set_on_map">Set on map</string>
+    <string name="clear">Clear</string>
+    <string name="address">Address</string>
+    <string name="close">Close</string>
+
+    <string name="note_optional">Note</string>
+
+    <string name="google_maps_key">AIzaSyCpM5Nm_snJoO2Jd6UOqNqswUZdSlJoKFA</string>
+
+    <string name="done">Done</string>
+
+    <string name="select_on_map">Tap the map to select a location</string>
+    <string name="selected_location">Selected location</string>
+
+
+
+
+
+
+
+
 
 
 </resources>

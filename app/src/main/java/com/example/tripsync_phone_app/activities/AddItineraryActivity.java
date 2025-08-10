@@ -1,38 +1,69 @@
 package com.example.tripsync_phone_app.activities;
 
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tripsync_phone_app.R;
-import com.example.tripsync_phone_app.auth.SessionManager;
+import com.example.tripsync_phone_app.adapter.PlacesAutoCompleteAdapter;
 import com.example.tripsync_phone_app.database.AppDatabase;
 import com.example.tripsync_phone_app.database.Destination;
 import com.example.tripsync_phone_app.database.Itinerary;
 import com.example.tripsync_phone_app.databinding.ActivityAddItineraryBinding;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class AddItineraryActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final int RC_PICK_ON_MAP = 100;
-
     private ActivityAddItineraryBinding binding;
     private AppDatabase db;
-    private SessionManager session;
     private int userId;
-    private final List<Destination> destinations = new ArrayList<>();
+
+    private PlacesClient placesClient;
+    private int destinationCount = 0;
+
+    private GoogleMap previewMap;
+    private View currentMapContainer;
+
+    private final ActivityResultLauncher<Intent> mapPicker =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    String addr = result.getData().getStringExtra("address");
+                    double lat = result.getData().getDoubleExtra("lat", 0);
+                    double lng = result.getData().getDoubleExtra("lng", 0);
+                    if (currentMapContainer != null) {
+                        AutoCompleteTextView auto = currentMapContainer.findViewById(R.id.autoAddress);
+                        auto.setText(addr);
+                        movePreviewMarker(new LatLng(lat, lng));
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,87 +72,138 @@ public class AddItineraryActivity extends AppCompatActivity implements View.OnCl
         setContentView(binding.getRoot());
 
         db = AppDatabase.getInstance(this);
-        session = new SessionManager(this);
-
-        // 1) read from session
-        userId = session.getUserId();
-        // 2) optional fallback from Intent (if you passed it from Home)
-        int fromIntent = getIntent().getIntExtra("user_id", -1);
-        if (fromIntent > 0) userId = fromIntent;
-
-        if (userId <= 0) {
-            Toast.makeText(this, "Please login again.", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return;
-        }
+        userId = getSharedPreferences("TripSyncPrefs", MODE_PRIVATE).getInt("user_id", -1);
 
         binding.topAppBar.setNavigationOnClickListener(v -> onBackPressed());
 
-        binding.fabAddDestination.setOnClickListener(this);
+        try {
+            ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+            String apiKey = ai.metaData.getString("com.google.android.geo.API_KEY", "");
+            if (!Places.isInitialized() && apiKey != null && !apiKey.isEmpty()) {
+                Places.initialize(getApplicationContext(), apiKey);
+            }
+        } catch (Exception ignored) {}
+        placesClient = Places.createClient(this);
+
+        binding.btnAddDestination.setOnClickListener(this);
         binding.btnConfirmSave.setOnClickListener(this);
+        updateAddButtonLabel();
     }
 
     @Override
     public void onClick(View v) {
-        int id = v.getId();
-        if (id == binding.fabAddDestination.getId()) {
-            Intent i = new Intent(this, MapPickerActivity.class);
-            startActivityForResult(i, RC_PICK_ON_MAP);
-        } else if (id == binding.btnConfirmSave.getId()) {
+        if (v.getId() == binding.btnAddDestination.getId()) {
+            addDestinationCard(null);
+        } else if (v.getId() == binding.btnConfirmSave.getId()) {
             saveItinerary();
         }
     }
 
-    // Blank card (if you ever need it)
-    private void addDestinationCard() {
-        addDestinationCardPrefilled(null);
+    private void updateAddButtonLabel() {
+        binding.btnAddDestination.setText("Add destination " + (destinationCount + 1));
     }
 
-    // Prefilled card (address from map picker)
-    private void addDestinationCardPrefilled(@Nullable String address) {
-        View cardView = getLayoutInflater().inflate(R.layout.destination_card, binding.destinationContainer, false);
+    private void addDestinationCard(@Nullable String address) {
+        destinationCount++;
+        updateAddButtonLabel();
 
-        TextInputEditText addressField = cardView.findViewById(R.id.editAddress);
-        TextInputEditText noteField = cardView.findViewById(R.id.editNote);
-        MaterialButton dateBtn = cardView.findViewById(R.id.btnSelectDate);
-        MaterialButton timeBtn = cardView.findViewById(R.id.btnSelectTime);
+        View card = getLayoutInflater().inflate(R.layout.destination_card, binding.destinationContainer, false);
 
-        if (address != null) addressField.setText(address);
+        TextView title = card.findViewById(R.id.txtTitle);
+        title.setText("Destination " + destinationCount);
 
-        dateBtn.setOnClickListener(v -> showDatePicker(dateBtn));
-        timeBtn.setOnClickListener(v -> showTimePicker(timeBtn));
+        ImageButton btnClose = card.findViewById(R.id.btnClose);
+        AutoCompleteTextView auto = card.findViewById(R.id.autoAddress);
+        TextInputEditText note = card.findViewById(R.id.editNote);
+        MaterialButton dateBtn = card.findViewById(R.id.btnSelectDate);
+        MaterialButton timeBtn = card.findViewById(R.id.btnSelectTime);
+        MaterialButton btnUseMap = card.findViewById(R.id.btnUseMap);
+        MaterialButton btnClear = card.findViewById(R.id.btnClear);
 
-        binding.destinationContainer.addView(cardView);
-    }
+        if (address != null) auto.setText(address);
 
-    private void showDatePicker(MaterialButton targetBtn) {
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText(getString(R.string.select_date))
-                .build();
-        datePicker.addOnPositiveButtonClickListener(selection ->
-                targetBtn.setText(datePicker.getHeaderText()));
-        datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
-    }
-
-    private void showTimePicker(MaterialButton targetBtn) {
-        MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(12)
-                .setMinute(0)
-                .setTitleText(getString(R.string.select_time))
-                .build();
-        timePicker.addOnPositiveButtonClickListener(v -> {
-            String time = String.format(Locale.getDefault(), "%02d:%02d",
-                    timePicker.getHour(), timePicker.getMinute());
-            targetBtn.setText(time);
+        PlacesAutoCompleteAdapter adapter = new PlacesAutoCompleteAdapter(this, placesClient);
+        auto.setAdapter(adapter);
+        auto.setOnItemClickListener((parent, view, position, id) -> {
+            String placeId = adapter.getPrediction(position).getPlaceId();
+            FetchPlaceRequest req = FetchPlaceRequest.newInstance(
+                    placeId, Arrays.asList(Place.Field.LAT_LNG, Place.Field.ADDRESS)
+            );
+            placesClient.fetchPlace(req).addOnSuccessListener(resp -> {
+                Place p = resp.getPlace();
+                auto.setText(p.getAddress());
+                if (p.getLatLng() != null) {
+                    movePreviewMarker(p.getLatLng());
+                }
+            });
         });
-        timePicker.show(getSupportFragmentManager(), "TIME_PICKER");
+
+        btnUseMap.setOnClickListener(v -> {
+            currentMapContainer = card;
+            Intent i = new Intent(this, MapPickerActivity.class);
+            mapPicker.launch(i);
+        });
+
+        btnClear.setOnClickListener(v -> auto.setText(""));
+
+        btnClose.setOnClickListener(v -> {
+            binding.destinationContainer.removeView(card);
+            destinationCount = Math.max(0, destinationCount - 1);
+            renumberCards();
+            updateAddButtonLabel();
+        });
+
+        dateBtn.setOnClickListener(v -> {
+            MaterialDatePicker<Long> picker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText(getString(R.string.select_date))
+                    .build();
+            picker.addOnPositiveButtonClickListener(sel -> dateBtn.setText(picker.getHeaderText()));
+            picker.show(getSupportFragmentManager(), "DATE");
+        });
+
+        timeBtn.setOnClickListener(v -> {
+            MaterialTimePicker tp = new MaterialTimePicker.Builder()
+                    .setTimeFormat(TimeFormat.CLOCK_12H)
+                    .setHour(12).setMinute(0)
+                    .setTitleText(getString(R.string.select_time))
+                    .build();
+            tp.addOnPositiveButtonClickListener(v1 ->
+                    timeBtn.setText(String.format(Locale.getDefault(), "%02d:%02d", tp.getHour(), tp.getMinute())));
+            tp.show(getSupportFragmentManager(), "TIME");
+        });
+
+        binding.destinationContainer.addView(card);
+    }
+
+    private void renumberCards() {
+        for (int i = 0; i < binding.destinationContainer.getChildCount(); i++) {
+            View c = binding.destinationContainer.getChildAt(i);
+            TextView t = c.findViewById(R.id.txtTitle);
+            t.setText("Destination " + (i + 1));
+        }
+    }
+
+    private void movePreviewMarker(LatLng latLng) {
+        if (previewMap == null) {
+            SupportMapFragment frag = SupportMapFragment.newInstance();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mapPreviewContainer, frag)
+                    .commit();
+            frag.getMapAsync(map -> {
+                previewMap = map;
+                previewMap.addMarker(new MarkerOptions().position(latLng).title("Selected"));
+                previewMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+            });
+        } else {
+            previewMap.clear();
+            previewMap.addMarker(new MarkerOptions().position(latLng).title("Selected"));
+            previewMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+        }
     }
 
     private void saveItinerary() {
-        String tripName = binding.editTripName.getText() != null
-                ? binding.editTripName.getText().toString().trim() : "";
+        String tripName = binding.editTripName.getText() == null ? "" :
+                binding.editTripName.getText().toString().trim();
 
         if (tripName.isEmpty()) {
             Toast.makeText(this, getString(R.string.trip_name_required), Toast.LENGTH_SHORT).show();
@@ -132,32 +214,29 @@ public class AddItineraryActivity extends AppCompatActivity implements View.OnCl
             return;
         }
 
-        // Insert parent itinerary
-        Itinerary itinerary = new Itinerary();
-        itinerary.tripName = tripName;
-        itinerary.userId = userId;
-        long itineraryId = db.itineraryDao().insertItinerary(itinerary);
+        Itinerary it = new Itinerary();
+        it.tripName = tripName;
+        it.userId = userId;
+        long itId = db.itineraryDao().insertItinerary(it);
 
-        // Insert each destination card
         for (int i = 0; i < binding.destinationContainer.getChildCount(); i++) {
             View card = binding.destinationContainer.getChildAt(i);
 
-            String address = textOf((TextInputEditText) card.findViewById(R.id.editAddress));
+            String address = ((AutoCompleteTextView) card.findViewById(R.id.autoAddress))
+                    .getText().toString().trim();
             String note = textOf((TextInputEditText) card.findViewById(R.id.editNote));
-            String date = textOf((MaterialButton) card.findViewById(R.id.btnSelectDate));
-            String time = textOf((MaterialButton) card.findViewById(R.id.btnSelectTime));
+            String date = ((MaterialButton) card.findViewById(R.id.btnSelectDate)).getText().toString().trim();
+            String time = ((MaterialButton) card.findViewById(R.id.btnSelectTime)).getText().toString().trim();
 
-            // Skip truly empty rows
-            if (isEmpty(address) && isEmpty(note) && isEmpty(date) && isEmpty(time)) continue;
+            if (address.isEmpty() && note.isEmpty() && date.isEmpty() && time.isEmpty()) continue;
 
-            Destination dest = new Destination();
-            dest.itineraryId = (int) itineraryId;
-            dest.address = address;
-            dest.note = note;
-            dest.date = date;
-            dest.time = time;
-
-            db.destinationDao().insertDestination(dest);
+            Destination d = new Destination();
+            d.itineraryId = (int) itId;
+            d.address = address;
+            d.note = note;
+            d.date = date;
+            d.time = time;
+            db.destinationDao().insertDestination(d);
         }
 
         Toast.makeText(this, getString(R.string.itinerary_saved), Toast.LENGTH_SHORT).show();
@@ -166,24 +245,5 @@ public class AddItineraryActivity extends AppCompatActivity implements View.OnCl
 
     private static String textOf(TextInputEditText et) {
         return et != null && et.getText() != null ? et.getText().toString().trim() : "";
-    }
-
-    private static String textOf(MaterialButton b) {
-        CharSequence t = b != null ? b.getText() : null;
-        return t != null ? t.toString().trim() : "";
-    }
-
-    private static boolean isEmpty(String s) {
-        return s == null || s.trim().isEmpty();
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_PICK_ON_MAP && resultCode == RESULT_OK && data != null) {
-            String address = data.getStringExtra("address");
-            addDestinationCardPrefilled(address);
-        }
     }
 }

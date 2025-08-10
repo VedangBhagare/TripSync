@@ -2,6 +2,7 @@ package com.example.tripsync_phone_app.activities;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,12 +62,12 @@ public class EditItineraryActivity extends AppCompatActivity implements View.OnC
     private void addCardPrefilled(String address, String note, String date, String time) {
         View card = getLayoutInflater().inflate(R.layout.destination_card, binding.destinationContainer, false);
 
-        TextInputEditText addressField = card.findViewById(R.id.editAddress);
+        AutoCompleteTextView autoAddress = card.findViewById(R.id.autoAddress);
         TextInputEditText noteField = card.findViewById(R.id.editNote);
         MaterialButton dateBtn = card.findViewById(R.id.btnSelectDate);
         MaterialButton timeBtn = card.findViewById(R.id.btnSelectTime);
 
-        if (address != null) addressField.setText(address);
+        if (address != null) autoAddress.setText(address);
         if (note != null) noteField.setText(note);
         if (date != null && !date.isEmpty()) dateBtn.setText(date);
         if (time != null && !time.isEmpty()) timeBtn.setText(time);
@@ -123,7 +124,8 @@ public class EditItineraryActivity extends AppCompatActivity implements View.OnC
         for (int i = 0; i < binding.destinationContainer.getChildCount(); i++) {
             View card = binding.destinationContainer.getChildAt(i);
 
-            String address = textOf((TextInputEditText) card.findViewById(R.id.editAddress));
+            AutoCompleteTextView auto = card.findViewById(R.id.autoAddress);
+            String address = auto != null && auto.getText() != null ? auto.getText().toString().trim() : "";
             String note = textOf((TextInputEditText) card.findViewById(R.id.editNote));
             String date = textOf((MaterialButton) card.findViewById(R.id.btnSelectDate));
             String time = textOf((MaterialButton) card.findViewById(R.id.btnSelectTime));

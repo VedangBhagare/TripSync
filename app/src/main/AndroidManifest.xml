@@ -21,6 +21,9 @@
         android:theme="@style/Theme.Tripsync_phone_app"
         tools:targetApi="31">
         <activity
+            android:name=".ui.MiniMapPickerBottomSheet"
+            android:exported="false" />
+        <activity
             android:name=".activities.EditItineraryActivity"
             android:exported="false" />
         <activity
