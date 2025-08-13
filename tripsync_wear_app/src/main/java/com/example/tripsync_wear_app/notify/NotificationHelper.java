@@ -23,15 +23,22 @@ import java.util.Locale;
 
 public class NotificationHelper {
     private static final String TAG = "TripSyncNotify";
-    public static final String CH_ID = "tripsync_itinerary";
+
+    public static final String CH_ID = "tripsync_itinerary_v2";
 
     public static void ensureChannel(Context ctx) {
         if (Build.VERSION.SDK_INT >= 26) {
+            // OLD: IMPORTANCE_DEFAULT
             NotificationChannel ch = new NotificationChannel(
-                    CH_ID, "Trip reminders", NotificationManager.IMPORTANCE_DEFAULT);
+                    CH_ID, "Trip reminders", NotificationManager.IMPORTANCE_HIGH); // <- NEW (HIGH for heads-up)
+            ch.setDescription("1-hour early trip/destination reminders");           // <- NEW
+            ch.enableVibration(true);                                               // <- NEW
+            ch.setVibrationPattern(new long[]{0, 250, 150, 250});                   // <- NEW
+            ch.setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC); // <- NEW
             ctx.getSystemService(NotificationManager.class).createNotificationChannel(ch);
         }
     }
+
 
     public static void scheduleAll(Context ctx, List<ItineraryModel> list) {
         ensureChannel(ctx);
@@ -100,6 +107,11 @@ public class NotificationHelper {
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(address + " — " + note + "\n" + date + " " + time))
                 .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                // OLD: PRIORITY_DEFAULT
+                .setPriority(NotificationCompat.PRIORITY_MAX)              // <- NEW (forces heads-up for compat)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)         // <- NEW (or CATEGORY_EVENT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)       // <- NEW
+                .setDefaults(NotificationCompat.DEFAULT_ALL);              // <- NEW (sound/vibrate per channel)
     }
+
 }

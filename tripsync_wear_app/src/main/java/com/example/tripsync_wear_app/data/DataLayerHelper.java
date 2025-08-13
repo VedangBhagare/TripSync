@@ -16,23 +16,25 @@ public class DataLayerHelper {
 
     public static void pull(Context ctx) {
         new Thread(() -> {
-            try {
-                List<Node> nodes = Tasks.await(Wearable.getNodeClient(ctx).getConnectedNodes());
-                if (nodes == null || nodes.isEmpty()) {
-                    Log.d(TAG, "No connected phone nodes");
-                    return;
-                }
-                Node target = nodes.get(0);
-                MessageClient mc = Wearable.getMessageClient(ctx);
-                Log.d(TAG, "sendMessage path=" + PATH_PING + " to=" + target.getId());
-                mc.sendMessage(target.getId(), PATH_PING, new byte[0])
-                        .addOnSuccessListener(aVoid -> Log.d(TAG, "PING ok"));
-                Log.d(TAG, "sendMessage path=" + PATH_PULL + " to=" + target.getId());
-                mc.sendMessage(target.getId(), PATH_PULL, new byte[0])
-                        .addOnSuccessListener((OnSuccessListener<Integer>) integer -> Log.d(TAG, "PULL ok"));
-            } catch (Exception e) {
-                Log.e(TAG, "pull failed", e);
-            }
-        }).start();
+                        for (int attempt = 1; attempt <= 3; attempt++) {
+                               try {
+                                        List<Node> nodes = Tasks.await(Wearable.getNodeClient(ctx).getConnectedNodes());
+                                       if (nodes == null || nodes.isEmpty()) {
+                                                Log.d(TAG, "No connected phone nodes (attempt " + attempt + ")");
+                                                Thread.sleep(400); // phone/Wear might still be negotiating connection
+                                                continue;
+                                            }
+                                        Node target = nodes.get(0);
+                                        MessageClient mc = Wearable.getMessageClient(ctx);
+                                        Log.d(TAG, "sendMessage path=" + PATH_PING + " to=" + target.getId());
+                                        mc.sendMessage(target.getId(), PATH_PING, new byte[0]);
+                                       Log.d(TAG, "sendMessage path=" + PATH_PULL + " to=" + target.getId());
+                                        mc.sendMessage(target.getId(), PATH_PULL, new byte[0]);
+                                        return; // success
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "pull failed (attempt " + attempt + ")", e);
+                                    }
+                        }
+                    }).start();
     }
 }

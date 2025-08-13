@@ -18,6 +18,16 @@ public class WearSyncService extends WearableListenerService {
     private static final String TAG = "WearSyncService";
     private static final String PATH_PUSH_JSON = "/tripsync/itineraries_json";
 
+    @Override public void onCreate() {
+                super.onCreate();
+                // If we have something cached, push it to the UI right away.
+                        String cached = getSharedPreferences("TripSyncWear", MODE_PRIVATE)
+                                .getString("last_json", null);
+                if (cached != null) {
+                        ItineraryStore.post(JsonParser.parseItineraries(cached));
+                    }
+            }
+
     @Override public void onMessageReceived(@NonNull MessageEvent event) {
         final String path = event.getPath();
         Log.d(TAG, "onMessageReceived path=" + path);
