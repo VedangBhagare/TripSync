@@ -1,21 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.tripsync_wear_app">
 
-    <uses-feature android:name="android.hardware.type.watch" android:required="true" />
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.type.watch"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
-        android:label="TripSync"
-        android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="TripSync"
         android:theme="@style/Theme.TripSyncWear">
-
-        <!-- Non-standalone: requires phone companion (correct for emulator pairing) -->
+        <activity
+            android:name=".AddWearItineraryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ItinerariesActivity"
+            android:exported="false" /> <!-- Non-standalone: requires phone companion (correct for emulator pairing) -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="false" />
@@ -26,11 +35,10 @@
             android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Wear listener service (modern filters; no deprecated BIND_LISTENER) -->
+        </activity> <!-- Wear listener service (modern filters; no deprecated BIND_LISTENER) -->
         <service
             android:name=".data.WearSyncService"
             android:exported="true">
@@ -38,7 +46,11 @@
             <!-- Messages from phone -->
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/tripsync" />
+
+                <data
+                    android:host="*"
+                    android:pathPrefix="/tripsync"
+                    android:scheme="wear" />
             </intent-filter>
 
             <!-- (Optional) DataItems / capabilities if you later use them -->
@@ -57,4 +69,5 @@
             android:name=".notify.ReminderReceiver"
             android:exported="false" />
     </application>
+
 </manifest>

@@ -9,34 +9,27 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.tripsync_wear_app.data.DataLayerHelper;
-import com.example.tripsync_wear_app.data.ItineraryStore;
 import com.example.tripsync_wear_app.databinding.ActivityMainBinding;
-import com.example.tripsync_wear_app.model.ItineraryModel;
 import com.example.tripsync_wear_app.notify.NotificationHelper;
-import com.example.tripsync_wear_app.ui.ItineraryAdapter;
 
-import java.util.List;
-
-public class MainActivity extends ComponentActivity {
+public class MainActivity extends ComponentActivity implements View.OnClickListener {
     private ActivityMainBinding binding;
-    private ItineraryAdapter adapter;
 
-    private final long AUTO_PULL_MS = 15_000; // 15s; tweak if you want
+    private static final long AUTO_PULL_MS = 15_000; // 15s
     private final Runnable autoPull = new Runnable() {
         @Override public void run() {
-                        if (isFinishing() || isDestroyed()) return;
-                        DataLayerHelper.pull(MainActivity.this);
-                        // re-post for the next cycle while we're still in the foreground
-                                binding.getRoot().postDelayed(this, AUTO_PULL_MS);
-                    }
+            if (isFinishing() || isDestroyed()) return;
+            DataLayerHelper.pull(MainActivity.this);
+            binding.getRoot().postDelayed(this, AUTO_PULL_MS);
+        }
     };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -44,64 +37,44 @@ public class MainActivity extends ComponentActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        adapter = new ItineraryAdapter();
-        binding.rvItineraries.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvItineraries.setAdapter(adapter);
+        // Buttons
+        binding.btnItineraries.setOnClickListener(this);
+        binding.btnAddItinerary.setOnClickListener(this);
 
-        SharedPreferences sp = getSharedPreferences("TripSyncWear", MODE_PRIVATE);
-        binding.ckNotifications.setChecked(sp.getBoolean("notify_enabled", true));
-        binding.ckNotifications.setOnCheckedChangeListener((b, checked) ->
-                sp.edit().putBoolean("notify_enabled", checked).apply());
-
-
-
-        ItineraryStore.itineraries().observe(this, (List<ItineraryModel> list) -> {
-            adapter.submit(list);
-            // (Optional) auto-schedule on new data if user re-enabled check box
-            if (sp.getBoolean("notify_enabled", true)) {
-                NotificationHelper.scheduleAll(this, list);
-            }
-        });
-
+        // Channel + permissions as before
         requestRuntimePermissionsIfNeeded();
         NotificationHelper.ensureChannel(this);
 
-        // Show whatever we last received so UI isn't empty on first open
-        String cached = getSharedPreferences("TripSyncWear", MODE_PRIVATE)
-                .getString("last_json", null);
-        if (cached != null) {
-            adapter.submit(com.example.tripsync_wear_app.util.JsonParser.parseItineraries(cached));
-        }
-
-
-
-        // First sync shortly after first layout so the node connection has time to come up
-                binding.getRoot().postDelayed(() -> DataLayerHelper.pull(this), 600);
-
+        // Warm up a pull shortly after layout so the node connection is ready
+        binding.getRoot().postDelayed(() -> DataLayerHelper.pull(this), 600);
     }
 
-    @Override
-    protected void onStart() {
+    @Override protected void onStart() {
         super.onStart();
-        // Pull again when Activity becomes visible
         binding.getRoot().postDelayed(() -> DataLayerHelper.pull(this), 600);
     }
 
     @Override protected void onResume() {
         super.onResume();
-        DataLayerHelper.pull(this);   // immediate pull on foreground
-                // Start foreground auto-poll loop
-                        binding.getRoot().removeCallbacks(autoPull);
-                binding.getRoot().postDelayed(autoPull, AUTO_PULL_MS);
+        DataLayerHelper.pull(this);
+        binding.getRoot().removeCallbacks(autoPull);
+        binding.getRoot().postDelayed(autoPull, AUTO_PULL_MS);
     }
 
     @Override protected void onPause() {
-                super.onPause();
-                // Stop auto-poll when leaving foreground
-                        binding.getRoot().removeCallbacks(autoPull);
-            }
+        super.onPause();
+        binding.getRoot().removeCallbacks(autoPull);
+    }
 
-
+    // Button click
+    @Override public void onClick(View v) {
+        int id = v.getId();
+        if (id == binding.btnItineraries.getId()) {
+            startActivity(new Intent(this, ItinerariesActivity.class));
+        } else if (id == binding.btnAddItinerary.getId()) {
+            startActivity(new Intent(this, AddWearItineraryActivity.class));
+        }
+    }
 
     private void requestRuntimePermissionsIfNeeded() {
         if (Build.VERSION.SDK_INT >= 33 &&

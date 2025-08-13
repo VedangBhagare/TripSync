@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">tripsync_wear_app</string>
+    <string name="title_add_itinerary">Add Itinerary</string>
+    <string name="hint_trip_name">Trip name</string>
+    <string name="voice_trip_name">Voice trip name</string>
+    <string name="hint_note_optional">Note (optional)</string>
+    <string name="voice_note">Voice note</string>
+    <string name="pick_date">Pick date</string>
+    <string name="pick_time">Pick time</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+
 </resources>

@@ -1,35 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.wear.widget.BoxInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:padding="8dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
+        <!-- App Title (top-center) -->
         <TextView
             android:id="@+id/title"
-            android:text="TripSync — Itineraries"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TripSync"
             android:textStyle="bold"
             android:textSize="14sp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Add Itinerary (center, above ITINERARIES) -->
+        <Button
+            android:id="@+id/btnAddItinerary"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="ADD ITINERARY"
+            android:textAllCaps="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintBottom_toTopOf="@id/btnItineraries"
+            app:layout_constraintVertical_chainStyle="packed"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp" />
 
-        <CheckBox
-            android:id="@+id/ckNotifications"
-            android:text="1‑hr reminders"
+        <!-- Itineraries (center, below ADD ITINERARY) -->
+        <Button
+            android:id="@+id/btnItineraries"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="ITINERARIES"
+            android:textAllCaps="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnAddItinerary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="12dp" />
 
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvItineraries"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="4dp"/>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.wear.widget.BoxInsetLayout>
