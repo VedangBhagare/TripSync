@@ -1,0 +1,9 @@
+<resources>
+    <!-- Simple Wear-friendly theme; uses Material Components and no action bar -->
+    <style name="Theme.TripSyncWear" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+    </style>
+</resources>

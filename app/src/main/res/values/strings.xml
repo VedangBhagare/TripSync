@@ -1,0 +1,100 @@
+<resources>
+    <string name="app_name">TripSync</string>
+    <string name="login_title">Sign in to TripSync</string>
+    <string name="login">Login</string>
+    <string name="register_title">Register with TripSync</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="name">Name</string>
+    <string name="register_here">Don\'t have an account? Register</string>
+    <string name="fill_all_fields">Please fill all fields</string>
+    <string name="invalid_email">Please enter a valid email</string>
+    <string name="password_mismatch">Passwords do not match</string>
+    <string name="password_too_short">Password must be at least 8 characters</string>
+    <string name="register_success">Registration successful</string>
+    <string name="email_exists">This email is already registered</string>
+    <string name="login_success">Login successful</string>
+    <string name="invalid_credentials">Invalid email or password</string>
+    <string name="already_have_account">Already have account? Login</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="add_itinerary">Add Itinerary</string>
+    <string name="tripsync_hero_title">TripSync</string>
+    <string name="tripsync_hero_sub">Plan smarter. Travel happier.</string>
+    <string name="home_intro">Create beautiful day-by-day plans, save tickets and places, and keep everything for your trip in one place.</string>
+    <string name="plan_right_now">Plan right now</string>
+    <string name="plan_card_title">Start a new itinerary</string>
+    <string name="plan_card_desc">Pick a destination, select dates, and add places. We’ll keep it tidy for you.</string>
+    <string name="start_planning">Start planning</string>
+    <string name="search">Search</string>
+    <string name="welcome_user">Welcome, %1$s</string>
+
+    <string name="add_destination">Add Destination</string>
+    <string name="destination_list">List of added destinations</string>
+
+    <string name="hint_address">Address</string>
+    <string name="hint_note_optional">Note (optional)</string>
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+
+
+    <string name="trip_name">Trip Name</string>
+    <string name="confirm_and_save">Confirm &amp; Save</string>
+
+    <string name="select_location">Select Location</string>
+    <string name="search_location">Search location</string>
+
+
+    <string name="trip_name_required">Trip name is required</string>
+    <string name="itinerary_saved">Itinerary saved!</string>
+
+
+    <string name="my_itineraries">My Itineraries</string>
+    <string name="edit_itinerary">Edit Itinerary</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+
+    <string name="set_on_map">Set on map</string>
+    <string name="clear">Clear</string>
+    <string name="address">Address</string>
+    <string name="close">Close</string>
+
+    <string name="note_optional">Note</string>
+
+    <string name="google_maps_key">AIzaSyCpM5Nm_snJoO2Jd6UOqNqswUZdSlJoKFA</string>
+
+    <string name="done">Done</string>
+
+    <string name="select_on_map">Tap the map to select a location</string>
+    <string name="selected_location">Selected location</string>
+
+    <string name="forgotpassword">Forgot password</string>
+    <string name="reset_password_title">Reset Password</string>
+    <string name="new_password">New password</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="email_not_found">No account found with this email</string>
+    <string name="password_reset_success">Password updated. Please log in.</string>
+    <string name="password_reset_failed">Could not update password. Try again.</string>
+
+    <string name="destination_1">Destination 1</string>
+    <string name="remove">Remove</string>
+    <string name="note">Note</string>
+    <string name="search_place_hint">Search your next Destination</string>
+    <string name="permission_denied">Location permission denied</string>
+    <string name="place_fetch_failed">Couldn’t fetch place</string>
+    <string name="no_places_found">No places found</string>
+    <string name="desc_my_location">Recenter on my location</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
+
+    <string name="add_destination_n">Add destination %1$d</string>
+    <string name="destination_n">Destination %1$d</string>
+    <string name="selected">Selected</string>
+    <string name="invalid_user">Invalid user. Please login again.</string>
+    <string name="explore_map">Explore map</string>
+
+</resources>

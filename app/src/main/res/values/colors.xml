@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="background_light">#F5F5F5</color>
+    <color name="paragraph">#667085</color>
+
+    <color name="primary">#12A6A2</color>         <!-- teal from logo -->
+    <color name="on_primary">#FFFFFF</color>
+    <color name="secondary">#F57C21</color>       <!-- orange from logo -->
+    <color name="on_secondary">#FFFFFF</color>
+
+    <!-- Surfaces / backgrounds -->
+    <color name="background">#FDF7EE</color>      <!-- soft ivory -->
+    <color name="background_alt">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#243132</color>
+    <color name="heading_color">#1A2B2C</color>
+    <color name="card_stroke">#D9E5E3</color>
+    <color name="red">#ff0000</color>
+
+    <color name="input_bg">#FFFFFFFF</color>
+
+</resources>
